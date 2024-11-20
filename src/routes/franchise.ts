@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { SquareService } from '../services/square-service';
 import { requireAuth } from '@clerk/express';
+import { FranchiseSummary } from '../models/franchise';
 
 export const franchiseRouter = Router();
 
@@ -10,7 +11,23 @@ franchiseRouter.get('/', requireAuth(), async (req: Request, res: Response) => {
     try {
         console.log(`User ID: ${req.auth?.userId} is fetching franchises.`);
 
-        const franchises = await squareService.listLocations();
+        const response = await squareService.listLocations();
+        const franchises = response.map<FranchiseSummary>((location) => {
+            return {
+                id: location.id,
+                name: location.name,
+                address: {
+                    addressLine1: location.address?.addressLine1,
+                    addressLine2: location.address?.addressLine2,
+                    city: location.address?.locality,
+                    state: location.address?.administrativeDistrictLevel1,
+                    postalCode: location.address?.postalCode,
+                    latitude: location.coordinates?.latitude,
+                    longitude: location.coordinates?.longitude
+                },
+                email: location.businessEmail
+            };
+        });
 
         res.status(200).send(franchises);
     } catch (error: unknown) {
@@ -27,7 +44,23 @@ franchiseRouter.get('/:locationId', requireAuth(), async (req: Request, res: Res
         console.log(`User ID: ${req.auth?.userId} is fetching franchise ${req.params.locationId}.`);
 
         const { locationId } = req.params;
-        const franchise = await squareService.getLocation(locationId);
+        const response = await squareService.getLocation(locationId);
+        const franchise = response
+            ? {
+                  id: response.id,
+                  name: response.name,
+                  address: {
+                      addressLine1: response.address?.addressLine1,
+                      addressLine2: response.address?.addressLine2,
+                      city: response.address?.locality,
+                      state: response.address?.administrativeDistrictLevel1,
+                      postalCode: response.address?.postalCode,
+                      latitude: response.coordinates?.latitude,
+                      longitude: response.coordinates?.longitude
+                  },
+                  email: response.businessEmail
+              }
+            : undefined;
 
         if (franchise) {
             res.status(200).send(franchise);
