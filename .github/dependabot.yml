@@ -4,4 +4,10 @@ updates:
       directory: '/'
       schedule:
           interval: 'weekly'
+          day: 'monday'
+          timezone: 'US/Mountain'
       open-pull-requests-limit: 1
+      groups:
+          npm:
+              patterns:
+                  - '*'
