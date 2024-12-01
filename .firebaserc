@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "crave-dev-e63f7",
+    "dev": "crave-dev-e63f7",
+    "prod": "crave-prod"
+  }
+}
